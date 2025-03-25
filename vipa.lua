@@ -1,26 +1,35 @@
--- License system with GUI
-local licenseKey = "https://pastebin.com/raw/DxMGTLAn" -- Replace with your actual Pastebin raw link
+--[[
+  KemilingHUB - Ultimate Combat Script
+  Features:
+  - License system with GUI
+  - ESP with health bars
+  - Body/Head Aimbot
+  - Spin attack (Q)
+  - Teleport behind target (G)
+  - Location teleport (P)
+  - Webhook notifications
+]]
 
--- Create the login GUI
+-- ===== LICENSE SYSTEM =====
+local licenseKey = "https://pastebin.com/raw/DxMGTLAn"
+
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "LicenseGui"
 screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
--- Main frame with rounded corners
+-- GUI Creation
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 350, 0, 250) -- Slightly larger for better spacing
+frame.Size = UDim2.new(0, 350, 0, 250)
 frame.Position = UDim2.new(0.5, -175, 0.5, -125)
 frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 frame.BorderSizePixel = 0
 frame.ClipsDescendants = true
 frame.Parent = screenGui
 
--- Create rounded corners effect using UICorner
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0, 12)
 corner.Parent = frame
 
--- Add inner frame for border effect
 local innerFrame = Instance.new("Frame")
 innerFrame.Size = UDim2.new(1, -4, 1, -4)
 innerFrame.Position = UDim2.new(0, 2, 0, 2)
@@ -32,19 +41,18 @@ local innerCorner = Instance.new("UICorner")
 innerCorner.CornerRadius = UDim.new(0, 8)
 innerCorner.Parent = innerFrame
 
--- Title with red accent
+-- GUI Elements
 local title = Instance.new("TextLabel")
-title.Text = "LICENSE "
+title.Text = "LICENSE VERIFICATION"
 title.Size = UDim2.new(1, 0, 0, 50)
 title.Position = UDim2.new(0, 0, 0, 10)
 title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(255, 50, 50) -- Red text
+title.TextColor3 = Color3.fromRGB(255, 50, 50)
 title.Font = Enum.Font.GothamBold
 title.TextSize = 24
 title.TextStrokeTransparency = 0.7
 title.Parent = innerFrame
 
--- Input box with rounded corners
 local inputBox = Instance.new("TextBox")
 inputBox.Size = UDim2.new(0.8, 0, 0, 45)
 inputBox.Position = UDim2.new(0.1, 0, 0.3, 0)
@@ -60,7 +68,6 @@ local inputCorner = Instance.new("UICorner")
 inputCorner.CornerRadius = UDim.new(0, 6)
 inputCorner.Parent = inputBox
 
--- Submit button with red gradient effect
 local submitButton = Instance.new("TextButton")
 submitButton.Size = UDim2.new(0.6, 0, 0, 45)
 submitButton.Position = UDim2.new(0.2, 0, 0.6, 0)
@@ -76,7 +83,6 @@ local buttonCorner = Instance.new("UICorner")
 buttonCorner.CornerRadius = UDim.new(0, 8)
 buttonCorner.Parent = submitButton
 
--- Add red gradient to button
 local buttonGradient = Instance.new("UIGradient")
 buttonGradient.Color = ColorSequence.new({
     ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 50, 50)),
@@ -85,7 +91,17 @@ buttonGradient.Color = ColorSequence.new({
 buttonGradient.Rotation = 90
 buttonGradient.Parent = submitButton
 
--- Button hover effect
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Text = ""
+statusLabel.Size = UDim2.new(0.8, 0, 0, 25)
+statusLabel.Position = UDim2.new(0.1, 0, 0.8, 0)
+statusLabel.BackgroundTransparency = 1
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 14
+statusLabel.Parent = innerFrame
+
+-- Button effects
 submitButton.MouseEnter:Connect(function()
     game:GetService("TweenService"):Create(
         buttonGradient,
@@ -102,18 +118,7 @@ submitButton.MouseLeave:Connect(function()
     ):Play()
 end)
 
--- Status label
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Text = ""
-statusLabel.Size = UDim2.new(0.8, 0, 0, 25)
-statusLabel.Position = UDim2.new(0.1, 0, 0.8, 0)
-statusLabel.BackgroundTransparency = 1
-statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-statusLabel.Font = Enum.Font.Gotham
-statusLabel.TextSize = 14
-statusLabel.Parent = innerFrame
-
--- Function to check license
+-- License verification
 local function checkLicense(enteredKey)
     local success, response = pcall(function()
         return game:HttpGet(licenseKey)
@@ -353,7 +358,7 @@ local function sendWebhook()
     end
 end
 
--- Submit button handler
+-- Submit handler
 submitButton.MouseButton1Click:Connect(function()
     local key = inputBox.Text
     if key == "" then
@@ -366,27 +371,20 @@ submitButton.MouseButton1Click:Connect(function()
         statusLabel.Text = "License valid! Loading..."
         statusLabel.TextColor3 = Color3.fromRGB(50, 255, 50)
         
-        -- Animate success
         game:GetService("TweenService"):Create(
             submitButton,
             TweenInfo.new(0.3),
             {BackgroundColor3 = Color3.fromRGB(50, 255, 50)}
         ):Play()
         
-        -- Remove GUI after short delay
-        wait(1.5)
+        task.wait(1.5)
         screenGui:Destroy()
-        
-        -- Send webhook notification
         sendWebhook()
-        
-        -- Load the main script here
         loadMainScript()
     else
         statusLabel.Text = "Invalid license key"
         statusLabel.TextColor3 = Color3.fromRGB(255, 50, 50)
         
-        -- Animate error
         local ts = game:GetService("TweenService")
         ts:Create(
             submitButton,
@@ -406,35 +404,30 @@ submitButton.MouseButton1Click:Connect(function()
     end
 end)
 
--- The main script that will run after successful login
+-- ===== MAIN SCRIPT =====
 function loadMainScript()
     -- Settings
     local settings = {
-        espKey = Enum.KeyCode.J,        -- Toggle ESP
-        bodyAimbotKey = Enum.KeyCode.E, -- Toggle Body Lock Aimbot
-        headAimbotKey = Enum.KeyCode.F, -- Toggle Head Lock Aimbot
-        teleportKey = Enum.KeyCode.P,    -- Teleport to location
-        spinKey = Enum.KeyCode.Q,        -- Toggle spinning
+        espKey = Enum.KeyCode.J,
+        bodyAimbotKey = Enum.KeyCode.E,
+        headAimbotKey = Enum.KeyCode.F,
+        teleportKey = Enum.KeyCode.P,
+        spinKey = Enum.KeyCode.Q,
+        teleportBehindKey = Enum.KeyCode.G,
         espColor = Color3.fromRGB(255, 70, 70),
         showHealth = true,
         espMaxDistance = 1000,
         espRefreshRate = 0.2,
-        healthBarSide = "Right",
-        healthBarWidth = 0.5,
-        healthBarHeight = 6,
-        healthTextOffset = 0.5,
-        nameOffset = Vector3.new(0, 3, 0),
-        nameTextSize = 18,
-        nameTextColor = Color3.new(1, 1, 1),
-        nameTextStrokeColor = Color3.new(0, 0, 0),
         ignoreTeam = true,
-        bodyLockSmoothness = 0.4,
-        headLockSmoothness = 1,
+        bodyLockSmoothness = 0.8,
+        headLockSmoothness = 3,
         ignoreLowHealth = true,
         lowHealthThreshold = 1,
         headLockOffset = Vector3.new(0, -0.15, 0),
         headSizeFactor = 0.8,
-        spinSpeed = 20                   -- Rotation speed (degrees per frame)
+        spinSpeed = 10,
+        teleportDistance = 3,
+        teleportLocation = CFrame.new(-112.114, 3814.211, 3197.210)
     }
 
     -- States
@@ -445,9 +438,10 @@ function loadMainScript()
     local headLockActive = false
     local currentTarget = nil
     local spinning = false
+    local spinVelocity = Vector3.new()
     local spinConnection = nil
 
-    -- Function to check if player is an enemy
+    -- Utility functions
     local function isEnemy(player)
         local localPlayer = game.Players.LocalPlayer
         if not localPlayer then return false end
@@ -463,7 +457,6 @@ function loadMainScript()
         return true
     end
 
-    -- Function to check if player has low health
     local function hasLowHealth(player)
         if not settings.ignoreLowHealth then return false end
         if not player.Character then return false end
@@ -474,18 +467,16 @@ function loadMainScript()
         return humanoid.Health <= settings.lowHealthThreshold
     end
 
-    -- Function to create ESP
+    -- ESP System
     local function createESP(player)
         if player == game.Players.LocalPlayer then return end
         if not isEnemy(player) then return end
         
-        -- Remove old ESP if exists
         if espFolders[player] then
             espFolders[player]:Destroy()
             espFolders[player] = nil
         end
         
-        -- Wait for character to appear
         if not player.Character then
             player.CharacterAdded:Wait()
             task.wait(1)
@@ -513,7 +504,7 @@ function loadMainScript()
         local nameBillboard = Instance.new("BillboardGui")
         nameBillboard.Name = "Name_Billboard"
         nameBillboard.Size = UDim2.new(0, 250, 0, 50)
-        nameBillboard.StudsOffset = settings.nameOffset
+        nameBillboard.StudsOffset = Vector3.new(0, 3, 0)
         nameBillboard.Adornee = player.Character:FindFirstChild("Head") or player.Character:WaitForChild("Head", 1)
         nameBillboard.AlwaysOnTop = true
         nameBillboard.MaxDistance = settings.espMaxDistance
@@ -524,37 +515,32 @@ function loadMainScript()
         nameLabel.Name = "Name_Label"
         nameLabel.Text = player.Name
         nameLabel.Size = UDim2.new(1, 0, 1, 0)
-        nameLabel.TextColor3 = settings.nameTextColor
+        nameLabel.TextColor3 = Color3.new(1, 1, 1)
         nameLabel.BackgroundTransparency = 1
-        nameLabel.TextStrokeColor3 = settings.nameTextStrokeColor
+        nameLabel.TextStrokeColor3 = Color3.new(0, 0, 0)
         nameLabel.TextStrokeTransparency = 0.5
         nameLabel.Font = Enum.Font.SourceSansBold
-        nameLabel.TextSize = settings.nameTextSize
-        nameLabel.TextScaled = false
+        nameLabel.TextSize = 18
         nameLabel.Parent = nameBillboard
         
         -- Health Bar
         if settings.showHealth then
-            local offsetX = settings.healthBarSide == "Right" and 2 or -2
             local healthBillboard = Instance.new("BillboardGui")
             healthBillboard.Name = "HealthBar_Billboard"
-            healthBillboard.Size = UDim2.new(settings.healthBarWidth, 0, settings.healthBarHeight + settings.healthTextOffset, 0)
-            healthBillboard.StudsOffset = Vector3.new(offsetX, 0, 0)
+            healthBillboard.Size = UDim2.new(0.5, 0, 6.5, 0)
+            healthBillboard.StudsOffset = Vector3.new(2, 0, 0)
             healthBillboard.Adornee = player.Character:FindFirstChild("HumanoidRootPart") or player.Character:WaitForChild("HumanoidRootPart", 1)
             healthBillboard.AlwaysOnTop = true
             healthBillboard.MaxDistance = settings.espMaxDistance
-            healthBillboard.ResetOnSpawn = false
             healthBillboard.Parent = folder
             
-            -- Health Bar Container
             local healthBarContainer = Instance.new("Frame")
             healthBarContainer.Name = "HealthBarContainer"
-            healthBarContainer.Size = UDim2.new(1, 0, settings.healthBarHeight/(settings.healthBarHeight + settings.healthTextOffset), 0)
+            healthBarContainer.Size = UDim2.new(1, 0, 6/6.5, 0)
             healthBarContainer.Position = UDim2.new(0, 0, 0, 0)
             healthBarContainer.BackgroundTransparency = 1
             healthBarContainer.Parent = healthBillboard
             
-            -- Actual Health Bar
             local healthBar = Instance.new("Frame")
             healthBar.Name = "HealthBar"
             healthBar.Size = UDim2.new(1, 0, 1, 0)
@@ -579,12 +565,11 @@ function loadMainScript()
             outline.Thickness = 1
             outline.Parent = healthBar
             
-            -- Health Text Below Bar
             local healthText = Instance.new("TextLabel")
             healthText.Name = "HealthText"
             healthText.Text = "100%"
-            healthText.Size = UDim2.new(1, 0, settings.healthTextOffset/(settings.healthBarHeight + settings.healthTextOffset), 0)
-            healthText.Position = UDim2.new(0, 0, settings.healthBarHeight/(settings.healthBarHeight + settings.healthTextOffset), 0)
+            healthText.Size = UDim2.new(1, 0, 0.5/6.5, 0)
+            healthText.Position = UDim2.new(0, 0, 6/6.5, 0)
             healthText.TextColor3 = Color3.new(1, 1, 1)
             healthText.BackgroundTransparency = 1
             healthText.TextStrokeColor3 = Color3.new(0, 0, 0)
@@ -594,7 +579,6 @@ function loadMainScript()
             healthText.Parent = healthBillboard
         end
         
-        -- Cleanup when character is removed
         player.CharacterRemoving:Connect(function()
             if espFolders[player] then
                 espFolders[player]:Destroy()
@@ -603,11 +587,9 @@ function loadMainScript()
         end)
     end
 
-    -- Update ESP information
     local function updateESP()
         for player, folder in pairs(espFolders) do
             if player and player.Character and folder and folder.Parent then
-                -- Update name position
                 local nameBillboard = folder:FindFirstChild("Name_Billboard")
                 if nameBillboard then
                     local head = player.Character:FindFirstChild("Head")
@@ -616,12 +598,10 @@ function loadMainScript()
                     end
                 end
                 
-                -- Update health bar
                 if settings.showHealth then
                     local healthBillboard = folder:FindFirstChild("HealthBar_Billboard")
                     if healthBillboard then
-                        local healthBar = healthBillboard:FindFirstChild("HealthBar") or
-                                        healthBillboard:FindFirstChild("HealthBarContainer"):FindFirstChild("HealthBar")
+                        local healthBar = healthBillboard:FindFirstChild("HealthBarContainer"):FindFirstChild("HealthBar")
                         local healthFill = healthBar and healthBar:FindFirstChild("HealthFill")
                         local healthText = healthBillboard:FindFirstChild("HealthText")
                         
@@ -629,13 +609,10 @@ function loadMainScript()
                         if humanoid then
                             local healthPercent = math.floor((humanoid.Health / humanoid.MaxHealth) * 100)
                             
-                            if healthText then 
-                                healthText.Text = tostring(healthPercent).."%" 
-                            end
+                            if healthText then healthText.Text = healthPercent.."%" end
                             if healthFill then
                                 healthFill.Size = UDim2.new(1, 0, healthPercent/100, 0)
                                 
-                                -- Color gradient
                                 if healthPercent > 75 then
                                     healthFill.BackgroundColor3 = Color3.new(0, 1, 0)
                                 elseif healthPercent > 50 then
@@ -659,19 +636,16 @@ function loadMainScript()
         end
     end
 
-    -- Function to toggle ESP
     local function toggleESP()
         espEnabled = not espEnabled
         
         if espEnabled then
-            -- Create ESP for all existing players
             for _, player in pairs(game.Players:GetPlayers()) do
                 if player ~= game.Players.LocalPlayer then
                     coroutine.wrap(function()
                         createESP(player)
                     end)()
                     
-                    -- Connect event for new characters
                     player.CharacterAdded:Connect(function(character)
                         if espEnabled then
                             task.wait(1)
@@ -681,7 +655,6 @@ function loadMainScript()
                 end
             end
         else
-            -- Remove all ESP
             for player, folder in pairs(espFolders) do
                 if folder then folder:Destroy() end
                 espFolders[player] = nil
@@ -695,14 +668,13 @@ function loadMainScript()
         })
     end
 
-    -- Function to get precise head position
+    -- Aimbot System
     local function getPreciseHeadPosition(head)
         if not head then return nil end
         local headSize = head.Size.Y
         return head.Position + Vector3.new(0, -headSize * (1 - settings.headSizeFactor), 0) + settings.headLockOffset
     end
 
-    -- Aimbot Functions
     local function findClosestPlayer(aimForHead)
         local playerList = game.Players:GetPlayers()
         local localPlayer = game.Players.LocalPlayer
@@ -801,13 +773,13 @@ function loadMainScript()
         end
     end
 
-    -- Teleport Function
+    -- Movement Features
     local function teleportToLocation()
         local player = game.Players.LocalPlayer
         if player and player.Character then
             local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
             if humanoidRootPart then
-                humanoidRootPart.CFrame = CFrame.new(-112.11402893066406, 3814.211181640625, 3197.210205078125)
+                humanoidRootPart.CFrame = settings.teleportLocation
                 game.StarterGui:SetCore("ChatMakeSystemMessage", {
                     Text = "Teleported to specified location!",
                     Color = Color3.new(0, 1, 1),
@@ -817,23 +789,37 @@ function loadMainScript()
         end
     end
 
-    -- Spin Function
     local function toggleSpin()
         spinning = not spinning
         local player = game.Players.LocalPlayer
         
         if spinning then
             game.StarterGui:SetCore("ChatMakeSystemMessage", {
-                Text = "Spin: ON",
+                Text = "Spin: ON (Movement allowed)",
                 Color = Color3.new(0, 1, 0),
                 FontSize = Enum.FontSize.Size24
             })
             
-            -- Start spinning
-            spinConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                spinVelocity = player.Character.HumanoidRootPart.Velocity
+            end
+            
+            if spinConnection then spinConnection:Disconnect() end
+            spinConnection = game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
+                if not spinning then return end
+                
                 if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     local root = player.Character.HumanoidRootPart
-                    root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(settings.spinSpeed), 0)
+                    local rotation = CFrame.Angles(0, math.rad(settings.spinSpeed * deltaTime * 60), 0)
+                    local currentCFrame = root.CFrame
+                    local newCFrame = currentCFrame * rotation
+                    
+                    if root.Velocity.Magnitude > 1 then
+                        spinVelocity = root.Velocity
+                    end
+                    
+                    root.CFrame = newCFrame
+                    root.Velocity = spinVelocity
                 end
             end)
         else
@@ -843,12 +829,51 @@ function loadMainScript()
                 FontSize = Enum.FontSize.Size24
             })
             
-            -- Stop spinning
+            spinVelocity = Vector3.new()
             if spinConnection then
                 spinConnection:Disconnect()
                 spinConnection = nil
             end
         end
+    end
+
+    local function teleportBehindTarget()
+        if not currentTarget or not currentTarget.Character then
+            game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                Text = "No target selected!",
+                Color = Color3.new(1, 0, 0),
+                FontSize = Enum.FontSize.Size24
+            })
+            return
+        end
+
+        local localPlayer = game.Players.LocalPlayer
+        local targetChar = currentTarget.Character
+        local localChar = localPlayer.Character
+        
+        if not localChar or not targetChar then return end
+        
+        local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+        local localRoot = localChar:FindFirstChild("HumanoidRootPart")
+        
+        if not targetRoot or not localRoot then return end
+        
+        local targetCF = targetRoot.CFrame
+        local behindPosition = targetCF * CFrame.new(0, 0, settings.teleportDistance)
+        
+        if spinning then
+            local currentSpinVelocity = spinVelocity
+            localRoot.CFrame = CFrame.new(behindPosition.Position, targetRoot.Position)
+            spinVelocity = currentSpinVelocity
+        else
+            localRoot.CFrame = CFrame.new(behindPosition.Position, targetRoot.Position)
+        end
+        
+        game.StarterGui:SetCore("ChatMakeSystemMessage", {
+            Text = "Teleported behind "..currentTarget.Name,
+            Color = Color3.new(0, 1, 1),
+            FontSize = Enum.FontSize.Size24
+        })
     end
 
     -- Keybinds
@@ -857,18 +882,20 @@ function loadMainScript()
             if input.KeyCode == settings.espKey then
                 toggleESP()
             elseif input.KeyCode == settings.bodyAimbotKey then
-                toggleAimbot(false) -- Body Lock
+                toggleAimbot(false)
             elseif input.KeyCode == settings.headAimbotKey then
-                toggleAimbot(true) -- Head Lock
+                toggleAimbot(true)
             elseif input.KeyCode == settings.teleportKey then
                 teleportToLocation()
             elseif input.KeyCode == settings.spinKey then
                 toggleSpin()
+            elseif input.KeyCode == settings.teleportBehindKey then
+                teleportBehindTarget()
             end
         end
     end)
 
-    -- Handle new players joining
+    -- Player management
     game.Players.PlayerAdded:Connect(function(player)
         player.CharacterAdded:Connect(function(character)
             if espEnabled then
@@ -878,7 +905,6 @@ function loadMainScript()
         end)
     end)
 
-    -- Handle players leaving
     game.Players.PlayerRemoving:Connect(function(player)
         if espFolders[player] then
             espFolders[player]:Destroy()
@@ -891,33 +917,31 @@ function loadMainScript()
         end
     end)
 
-    -- Cleanup function
+    -- Cleanup
     local function cleanup()
-        -- Stop spinning
+        spinning = false
+        spinVelocity = Vector3.new()
+        
         if spinConnection then
             spinConnection:Disconnect()
             spinConnection = nil
         end
         
-        -- Remove all ESP
         for player, folder in pairs(espFolders) do
             if folder then folder:Destroy() end
             espFolders[player] = nil
         end
     end
 
-    -- Connect cleanup to character removal
     game.Players.LocalPlayer.CharacterRemoving:Connect(cleanup)
 
     -- Main loop
-    game:GetService("RunService").Heartbeat:Connect(function()
-        -- ESP update
+    game:GetService("RunService").Heartbeat:Connect(function(deltaTime)
         if espEnabled and (tick() - lastEspUpdate) >= settings.espRefreshRate then
             updateESP()
             lastEspUpdate = tick()
         end
         
-        -- Aimbot update
         if bodyLockActive or headLockActive then
             if not currentTarget or not currentTarget.Character or hasLowHealth(currentTarget) then
                 currentTarget = findClosestPlayer(headLockActive)
@@ -938,7 +962,8 @@ function loadMainScript()
                "E = Body Lock (HumanoidRootPart)\n"..
                "F = Head Lock (Head)\n"..
                "P = Teleport to Location\n"..
-               "Q = Toggle Spin",
+               "Q = Toggle Spin\n"..
+               "G = Teleport Behind Target",
         Color = Color3.new(0, 1, 1),
         FontSize = Enum.FontSize.Size24
     })
