@@ -425,7 +425,7 @@ function loadMainScript()
         lowHealthThreshold = 1,
         headLockOffset = Vector3.new(0, -0.15, 0),
         headSizeFactor = 0.8,
-        spinSpeed = 10,
+        spinSpeed = 50,
         teleportDistance = 3,
         teleportLocation = CFrame.new(-112.114, 3814.211, 3197.210)
     }
