@@ -413,7 +413,8 @@ function loadMainScript()
         espKey = Enum.KeyCode.J,        -- Toggle ESP
         bodyAimbotKey = Enum.KeyCode.E, -- Toggle Body Lock Aimbot
         headAimbotKey = Enum.KeyCode.F, -- Toggle Head Lock Aimbot
-        resetCharacterKey = Enum.KeyCode.P, -- Reset character
+        teleportKey = Enum.KeyCode.P,    -- Teleport to location
+        spinKey = Enum.KeyCode.Q,        -- Toggle spinning
         espColor = Color3.fromRGB(255, 70, 70),
         showHealth = true,
         espMaxDistance = 1000,
@@ -432,7 +433,8 @@ function loadMainScript()
         ignoreLowHealth = true,
         lowHealthThreshold = 1,
         headLockOffset = Vector3.new(0, -0.15, 0),
-        headSizeFactor = 0.8
+        headSizeFactor = 0.8,
+        spinSpeed = 20                   -- Rotation speed (degrees per frame)
     }
 
     -- States
@@ -442,6 +444,8 @@ function loadMainScript()
     local bodyLockActive = false
     local headLockActive = false
     local currentTarget = nil
+    local spinning = false
+    local spinConnection = nil
 
     -- Function to check if player is an enemy
     local function isEnemy(player)
@@ -508,7 +512,7 @@ function loadMainScript()
         -- Name Display
         local nameBillboard = Instance.new("BillboardGui")
         nameBillboard.Name = "Name_Billboard"
-        nameBillboard.Size = UDim2.new(0, 200, 0, 50)
+        nameBillboard.Size = UDim2.new(0, 250, 0, 50)
         nameBillboard.StudsOffset = settings.nameOffset
         nameBillboard.Adornee = player.Character:FindFirstChild("Head") or player.Character:WaitForChild("Head", 1)
         nameBillboard.AlwaysOnTop = true
@@ -797,18 +801,52 @@ function loadMainScript()
         end
     end
 
-    -- Function to reset character
-    local function resetCharacter()
-        local character = game.Players.LocalPlayer.Character
-        if character then
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.Health = 0
+    -- Teleport Function
+    local function teleportToLocation()
+        local player = game.Players.LocalPlayer
+        if player and player.Character then
+            local humanoidRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+            if humanoidRootPart then
+                humanoidRootPart.CFrame = CFrame.new(-112.11402893066406, 3814.211181640625, 3197.210205078125)
                 game.StarterGui:SetCore("ChatMakeSystemMessage", {
-                    Text = "Character reset!",
+                    Text = "Teleported to specified location!",
                     Color = Color3.new(0, 1, 1),
                     FontSize = Enum.FontSize.Size24
                 })
+            end
+        end
+    end
+
+    -- Spin Function
+    local function toggleSpin()
+        spinning = not spinning
+        local player = game.Players.LocalPlayer
+        
+        if spinning then
+            game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                Text = "Spin: ON",
+                Color = Color3.new(0, 1, 0),
+                FontSize = Enum.FontSize.Size24
+            })
+            
+            -- Start spinning
+            spinConnection = game:GetService("RunService").Heartbeat:Connect(function()
+                if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                    local root = player.Character.HumanoidRootPart
+                    root.CFrame = root.CFrame * CFrame.Angles(0, math.rad(settings.spinSpeed), 0)
+                end
+            end)
+        else
+            game.StarterGui:SetCore("ChatMakeSystemMessage", {
+                Text = "Spin: OFF",
+                Color = Color3.new(1, 0, 0),
+                FontSize = Enum.FontSize.Size24
+            })
+            
+            -- Stop spinning
+            if spinConnection then
+                spinConnection:Disconnect()
+                spinConnection = nil
             end
         end
     end
@@ -822,8 +860,10 @@ function loadMainScript()
                 toggleAimbot(false) -- Body Lock
             elseif input.KeyCode == settings.headAimbotKey then
                 toggleAimbot(true) -- Head Lock
-            elseif input.KeyCode == settings.resetCharacterKey then
-                resetCharacter()
+            elseif input.KeyCode == settings.teleportKey then
+                teleportToLocation()
+            elseif input.KeyCode == settings.spinKey then
+                toggleSpin()
             end
         end
     end)
@@ -850,6 +890,24 @@ function loadMainScript()
             headLockActive = false
         end
     end)
+
+    -- Cleanup function
+    local function cleanup()
+        -- Stop spinning
+        if spinConnection then
+            spinConnection:Disconnect()
+            spinConnection = nil
+        end
+        
+        -- Remove all ESP
+        for player, folder in pairs(espFolders) do
+            if folder then folder:Destroy() end
+            espFolders[player] = nil
+        end
+    end
+
+    -- Connect cleanup to character removal
+    game.Players.LocalPlayer.CharacterRemoving:Connect(cleanup)
 
     -- Main loop
     game:GetService("RunService").Heartbeat:Connect(function()
@@ -879,7 +937,8 @@ function loadMainScript()
                "J = ESP\n"..
                "E = Body Lock (HumanoidRootPart)\n"..
                "F = Head Lock (Head)\n"..
-               "P = Reset Character",
+               "P = Teleport to Location\n"..
+               "Q = Toggle Spin",
         Color = Color3.new(0, 1, 1),
         FontSize = Enum.FontSize.Size24
     })
