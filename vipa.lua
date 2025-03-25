@@ -420,7 +420,7 @@ function loadMainScript()
         espRefreshRate = 0.2,
         ignoreTeam = true,
         bodyLockSmoothness = 0.8,
-        headLockSmoothness = 3,
+        headLockSmoothness = 1,
         ignoreLowHealth = true,
         lowHealthThreshold = 1,
         headLockOffset = Vector3.new(0, -0.15, 0),
