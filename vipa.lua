@@ -8,6 +8,138 @@
 -- - Webhook notifications
 -- - Invisibility with GUI indicator (Backquote `)
 
+local function createLoadingScreen()
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "KemilingLoadingScreen"
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.ResetOnSpawn = false
+
+    -- Background Blur
+    local blur = Instance.new("BlurEffect")
+    blur.Size = 24
+    blur.Parent = game:GetService("Lighting")
+    
+    -- Main Container
+    local container = Instance.new("Frame")
+    container.Size = UDim2.new(0.35, 0, 0.2, 0)
+    container.Position = UDim2.new(0.325, 0, 0.4, 0)
+    container.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    container.BackgroundTransparency = 0.3
+    container.BorderSizePixel = 0
+    container.ClipsDescendants = true
+    container.Parent = screenGui
+
+    -- Modern UI Corners
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = container
+
+    -- Title Text
+    local title = Instance.new("TextLabel")
+    title.Text = "KEMILING HUB"
+    title.Font = Enum.Font.GothamBlack
+    title.TextSize = 24
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.BackgroundTransparency = 1
+    title.Size = UDim2.new(1, 0, 0.3, 0)
+    title.Position = UDim2.new(0, 0, 0.1, 0)
+    title.Parent = container
+
+    -- Subtitle Text
+    local subtitle = Instance.new("TextLabel")
+    subtitle.Text = "Premium Aladia Script"
+    subtitle.Font = Enum.Font.GothamMedium
+    subtitle.TextSize = 14
+    subtitle.TextColor3 = Color3.fromRGB(200, 200, 200)
+    subtitle.BackgroundTransparency = 1
+    subtitle.Size = UDim2.new(1, 0, 0.2, 0)
+    subtitle.Position = UDim2.new(0, 0, 0.35, 0)
+    subtitle.Parent = container
+
+    -- Modern Loading Bar Container
+    local loadingBarContainer = Instance.new("Frame")
+    loadingBarContainer.Name = "LoadingBarContainer"
+    loadingBarContainer.Size = UDim2.new(0.8, 0, 0.08, 0)
+    loadingBarContainer.Position = UDim2.new(0.1, 0, 0.6, 0)
+    loadingBarContainer.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    loadingBarContainer.BorderSizePixel = 0
+    loadingBarContainer.Parent = container
+
+    local containerCorner = Instance.new("UICorner")
+    containerCorner.CornerRadius = UDim.new(1, 0)
+    containerCorner.Parent = loadingBarContainer
+
+    -- Loading Bar
+    local loadingBar = Instance.new("Frame")
+    loadingBar.Name = "LoadingBar"
+    loadingBar.Size = UDim2.new(0, 0, 1, 0)
+    loadingBar.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+    loadingBar.BorderSizePixel = 0
+    loadingBar.Parent = loadingBarContainer
+
+    local barCorner = Instance.new("UICorner")
+    barCorner.CornerRadius = UDim.new(1, 0)
+    barCorner.Parent = loadingBar
+
+    -- Percentage Text
+    local percentageText = Instance.new("TextLabel")
+    percentageText.Text = "0%"
+    percentageText.Font = Enum.Font.GothamBold
+    percentageText.TextSize = 16
+    percentageText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    percentageText.BackgroundTransparency = 1
+    percentageText.Size = UDim2.new(1, 0, 0.2, 0)
+    percentageText.Position = UDim2.new(0, 0, 0.75, 0)
+    percentageText.Parent = container
+
+    -- Status Text
+    local statusText = Instance.new("TextLabel")
+    statusText.Text = "Initializing..."
+    statusText.Font = Enum.Font.GothamMedium
+    statusText.TextSize = 12
+    statusText.TextColor3 = Color3.fromRGB(180, 180, 180)
+    statusText.BackgroundTransparency = 1
+    statusText.Size = UDim2.new(1, 0, 0.15, 0)
+    statusText.Position = UDim2.new(0, 0, 0.9, 0)
+    statusText.Parent = container
+
+    -- Add to GUI
+    screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+    -- Animate Loading Bar (15 Seconds)
+    local duration = 15
+    local startTime = tick()
+    
+    local statusMessages = {
+        "Loading assets...",
+        "Initializing modules...",
+        "Setting up environment...",
+        "Almost there...",
+        "Preparing interface...",
+        "Finalizing..."
+    }
+    
+    local connection
+    connection = game:GetService("RunService").RenderStepped:Connect(function()
+        local elapsed = tick() - startTime
+        local progress = math.min(elapsed / duration, 1)
+        
+        -- Update loading bar
+        loadingBar.Size = UDim2.new(progress, 0, 1, 0)
+        percentageText.Text = string.format("%d%%", math.floor(progress * 100))
+        
+        -- Update status text periodically
+        local statusIndex = math.min(math.floor(progress * #statusMessages) + 1, #statusMessages)
+        statusText.Text = statusMessages[statusIndex]
+        
+        if progress >= 1 then
+            connection:Disconnect()
+            screenGui:Destroy()
+            blur:Destroy()
+        end
+    end)
+end
+
 -- Function to send webhook
 local function sendWebhook()
     --// Config
