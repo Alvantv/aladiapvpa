@@ -6,6 +6,7 @@
 -- - Teleport behind target (G)
 -- - Location teleport (P)
 -- - Webhook notifications
+-- - Invisibility with GUI indicator (Backquote `)
 
 -- Function to send webhook
 local function sendWebhook()
@@ -237,6 +238,7 @@ local settings = {
     teleportKey = Enum.KeyCode.P,
     spinKey = Enum.KeyCode.Q,
     teleportBehindKey = Enum.KeyCode.G,
+    invisibilityKey = Enum.KeyCode.Backquote,
     espColor = Color3.fromRGB(255, 70, 70),
     showHealth = true,
     espMaxDistance = 1000,
@@ -263,6 +265,35 @@ local currentTarget = nil
 local spinning = false
 local spinVelocity = Vector3.new()
 local spinConnection = nil
+local invis_on = false
+
+-- Create Invisibility GUI
+local invisGui = Instance.new("ScreenGui")
+local invisFrame = Instance.new("Frame")
+local invisText = Instance.new("TextLabel")
+
+-- Configure GUI
+invisGui.Name = "InvisibilityGUI"
+invisGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+invisGui.ResetOnSpawn = false
+
+invisFrame.Name = "InvisFrame"
+invisFrame.Parent = invisGui
+invisFrame.BackgroundColor3 = Color3.new(0, 0, 0)
+invisFrame.BackgroundTransparency = 0.5
+invisFrame.BorderSizePixel = 0
+invisFrame.Position = UDim2.new(0.5, -100, 0, 10)
+invisFrame.Size = UDim2.new(0, 200, 0, 30)
+invisFrame.Visible = false
+
+invisText.Name = "InvisText"
+invisText.Parent = invisFrame
+invisText.BackgroundTransparency = 1
+invisText.Size = UDim2.new(1, 0, 1, 0)
+invisText.Font = Enum.Font.SourceSansBold
+invisText.Text = "INVISIBILITY: OFF"
+invisText.TextColor3 = Color3.new(1, 1, 1)
+invisText.TextSize = 18
 
 -- Utility functions
 local function isEnemy(player)
@@ -699,6 +730,61 @@ local function teleportBehindTarget()
     })
 end
 
+-- Invisibility System
+local function toggleInvisibility()
+    if not game.Players.LocalPlayer.Character then return end
+    
+    invis_on = not invis_on
+    if invis_on then
+        local savedpos = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame
+        wait()
+        game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-25.95, 84, 3537.55))
+        wait(.15)
+        local Seat = Instance.new('Seat', game.Workspace)
+        Seat.Anchored = false
+        Seat.CanCollide = false
+        Seat.Name = 'invischair'
+        Seat.Transparency = 1
+        Seat.Position = Vector3.new(-25.95, 84, 3537.55)
+        local Weld = Instance.new("Weld", Seat)
+        Weld.Part0 = Seat
+        Weld.Part1 = game.Players.LocalPlayer.Character:FindFirstChild("Torso") or game.Players.LocalPlayer.Character.UpperTorso
+        wait()
+        Seat.CFrame = savedpos
+        
+        -- Update GUI
+        invisFrame.Visible = true
+        invisFrame.BackgroundColor3 = Color3.fromRGB(0, 170, 0) -- Green when active
+        invisText.Text = "INVISIBILITY: ON"
+        
+        game.StarterGui:SetCore("ChatMakeSystemMessage", {
+            Text = "Invisibility: ON",
+            Color = Color3.new(0, 1, 0),
+            FontSize = Enum.FontSize.Size24
+        })
+    else
+        local invisChair = workspace:FindFirstChild('invischair')
+        if invisChair then
+            invisChair:Remove()
+        end
+        
+        -- Update GUI
+        invisFrame.BackgroundColor3 = Color3.fromRGB(170, 0, 0) -- Red when inactive
+        invisText.Text = "INVISIBILITY: OFF"
+        
+        -- Hide GUI after 2 seconds
+        task.delay(2, function()
+            invisFrame.Visible = false
+        end)
+        
+        game.StarterGui:SetCore("ChatMakeSystemMessage", {
+            Text = "Invisibility: OFF",
+            Color = Color3.new(1, 0, 0),
+            FontSize = Enum.FontSize.Size24
+        })
+    end
+end
+
 -- Keybinds
 game:GetService("UserInputService").InputBegan:Connect(function(input, processed)
     if not processed then
@@ -714,6 +800,8 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, processed
             toggleSpin()
         elseif input.KeyCode == settings.teleportBehindKey then
             teleportBehindTarget()
+        elseif input.KeyCode == settings.invisibilityKey then
+            toggleInvisibility()
         end
     end
 end)
@@ -754,6 +842,15 @@ local function cleanup()
         if folder then folder:Destroy() end
         espFolders[player] = nil
     end
+    
+    local invisChair = workspace:FindFirstChild('invischair')
+    if invisChair then
+        invisChair:Remove()
+    end
+    
+    -- Reset invisibility GUI
+    invisFrame.Visible = false
+    invis_on = false
 end
 
 game.Players.LocalPlayer.CharacterRemoving:Connect(cleanup)
@@ -786,7 +883,8 @@ game.StarterGui:SetCore("ChatMakeSystemMessage", {
            "F = Head Lock (Head)\n"..
            "P = Teleport to Location\n"..
            "Q = Toggle Spin\n"..
-           "G = Teleport Behind Target",
+           "G = Teleport Behind Target\n"..
+           "` (Backquote) = Toggle Invisibility",
     Color = Color3.new(0, 1, 1),
     FontSize = Enum.FontSize.Size24
 })
