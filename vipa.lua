@@ -174,7 +174,7 @@ end
 local function sendWebhook()
     --// Config
     getgenv().whscript = "KemilingHUB"        --Change to the name of your script
-    getgenv().webhookexecUrl = "https://discord.com/api/webhooks/1354067117464485959/ujySjJeB-Ceb6cL2HkIfuM9yN5qpltMTPi7lGU60XCiK4VlpMJSkt1uLo11zNCtx8fUa"  --Put your Webhook Url here
+    getgenv().webhookexecUrl = "https://discord.com/api/webhooks/1363129819969093693/WTBX6kftxE2rbM0-EF8p1EpuxNisZKzWcSiWml8C7acRwg9UQsQYPEuOF_WHDVbIRLKy"  --Put your Webhook Url here
     getgenv().ExecLogSecret = true                --decide to also log secret section
 
     --// Execution Log Script
